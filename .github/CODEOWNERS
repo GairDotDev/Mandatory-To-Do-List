@@ -1,0 +1,18 @@
+# Mandatory To Do App Code Owners
+
+## Global default code owner
+
+* @GairDotDev
+
+## Backend
+
+/api/ @GairDotDev
+
+## Frontend
+
+/frontend/ @GairDotDev
+
+## Configuration and CI/CD
+
+docker-compose.yml @GairDotDev
+/docs/ @GairDotDev

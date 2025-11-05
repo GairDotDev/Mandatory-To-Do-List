@@ -1,0 +1,62 @@
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: mandatory-todo-postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: mandatory_todo
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - web
+
+  api:
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+    container_name: mandatory-todo-api
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/mandatory_todo?sslmode=disable
+      JWT_SECRET_KEY: dev-secret-change-in-production-min-32-chars
+      SECRET_KEY: dev-secret-change-in-production-min-32-chars
+      REDIS_URL: redis://your-redis-host:6379/0
+      REDIS_ENABLED: "true"
+      DEBUG: "true"
+      CORS_ORIGINS: '["http://localhost:3000","http://localhost:3001"]'
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - web
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        VITE_API_BASE_URL: http://localhost:8080
+    container_name: mandatory-todo-frontend
+    ports:
+      - "3001:3000"
+    depends_on:
+      - api
+    networks:
+      - web
+
+volumes:
+  postgres_data:
+
+networks:
+  web:
+    external: false
+
